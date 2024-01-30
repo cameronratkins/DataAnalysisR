@@ -1,0 +1,126 @@
+---
+title: "Assignment 01"
+author: "Cameron Atkins"
+date: "Due: 2023-09-08"
+output: html_document
+---
+
+### 1.Data used for the assignment
+The data used for this project is IMDb's list of Top 1000 movies of all time. The
+original data featured nine colums of data, but for the purposes of this assignment,
+columns of data was reduced to four.
+
+[Link to Kaggle DataSet](https://www.kaggle.com/datasets/inductiveanks/top-1000-imdb-movies-dataset)
+
+#### Importing the data from the working directory
+
+```{r}
+data <- read.csv("Top_1000_IMDb_movies_New_version.csv", header = TRUE)
+```
+
+#### Taking a look at the data
+```{r}
+head(data)
+```
+
+#### Select 4 Variables: Year of Release, Watch Time, MetaScore, and Gross Ticket Sales
+```{r}
+keep_columns <- c(3, 4, 6, 7)
+```
+
+Reduce the number of variables used
+```{r}
+data <- data[, keep_columns]
+```
+
+View new data after reduction
+
+```{r}
+head(data)
+```
+### 2. Summary of the data
+#### Structure of the data
+```{r}
+str(data)
+```
+
+#### Summary of the data
+```{r}
+summary(data)
+```
+
+### 3. Search for any outliers in the box office gross
+```{r}
+# Convert gross figures from character to numeric
+numeric_gross <- as.numeric(data$Gross)
+xu= quantile(numeric_gross, probs = 0.85, na.rm = TRUE)
+xl = quantile(numeric_gross, probs = 0.15, na.rm = TRUE)
+IQR = xu - xl
+
+plot(numeric_gross, ylab='Box Office Gross')
+abline(h=xu, lty=2)
+abline(h=xu+1.5*IQR, lty=3)
+```
+
+Out of the 1000 movies, only 13 earned more than US $400 million. However, dataset
+doesn't specify if amounts are in current or real dollars.
+
+### 4. Visualizations for some variables
+
+#### Scatterplot between 2 variables
+A visualization that can help determine if films produced recently have higher 
+metascores than older films.
+```{r}
+plot(data$Year.of.Release, data$Metascore.of.movie,
+     main = "Years and MetaScore",
+     xlab = "Year of Release",
+     ylab = "MetaScore",
+     pch = 16,
+     col = "deepskyblue"
+     )
+```
+
+#### One barplot providing the count of the factor variable
+
+```{r}
+year_factor <- factor(c(data$Year.of.Release))
+year_table <- table(year_factor)
+year_table
+barplot(year_table,
+        main = "Barplot of a Factor",
+        xlab = "Categories",
+        ylab = "Frequency",
+        col = "deepskyblue",  # Set the bar color (you can customize)
+        border = "black"  # Set the bar border color (you can customize)
+)
+```
+
+#### Histogram of the length of the Top 1000 movies
+
+```{r}
+hist(data$Watch.Time,
+     breaks = seq(45,350, by = 20),
+     main = "Length of Top 1000 Movies",
+     xlab = "Movie Length (in Minutes)",
+     ylab = "Frequency",
+     col = "deepskyblue",  # Set the bar color (you can customize)
+     border = "black"    # Set the bar border color (you can customize)
+)
+```
+
+### 5. Create a linear model for two of the numerical variables
+
+Plotting watch time as x and metascore as y to determine if there is any 
+correlation between the length of the movie and its Metascore.
+```{r}
+df <- data.frame(x = c(data$Watch.Time), y=c(data$Metascore.of.movie))
+model <- lm(y ~ x, data = df)
+summary(model)
+plot(main = "Relationship between Movie Watch Time and MetaScore", 
+     df$x, 
+     df$y, 
+     xlab = "Movie Watch Time (minutes)", 
+     ylab = "Movie MetaScore")
+abline(model, col = "red")
+```
+
